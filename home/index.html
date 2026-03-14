@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶龙小屋</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 登录弹窗 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>登录奶龙小屋</h2>
+            <!-- 新增的剧情文字说明 -->
+            <p style="margin: 15px 0; line-height: 1.5; color: #559;">
+                你捡到了一只来自异次元的奶龙，它必须在7天内收集足够的“快乐能量”，才能打开异世界大门回家，如果失败，它将永远留在这里陷入沉睡。
+            </p>
+            <!-- 新增密码输入框 -->
+            <input type="text" id="username" placeholder="请输入你的昵称" required>
+            <input type="password" id="password" placeholder="请输入密码" required>
+            <button onclick="login()">登录/注册</button>
+            <p>首次输入昵称和密码即为创建账户，后续用相同信息可登录</p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainPage" style="display: none;">
+        <!-- 顶部信息：日历+功能按钮 -->
+        <div class="top-bar">
+            <span id="calendarDisplay">第1天</span> <!-- 日历按钮（不可点击） -->
+            <button onclick="jumpToPlay()">玩耍</button>
+            <button onclick="jumpToMakeLeg()">做鸡腿</button>
+            <button onclick="jumpToAdventure()">探险</button>
+        </div>
+
+        <!-- 主体区域：奶龙+功能区 -->
+        <div class="main-container">
+            <!-- 奶龙展示区 -->
+            <div class="nailong-area">
+                <!-- 替换奶龙图片路径 -->
+                <img id="nailongImg" src="../images/Nailongsit.png" alt="奶龙">
+                <!-- 新增鸡腿数量显示 -->
+                <p id="legCountDisplay" style="margin-top: 10px; font-size: 18px; color: #e64a19;">鸡腿：<span id="legCount">0</span>个</p>
+                <!-- 新增快乐能量（带进度条） -->
+                <div style="margin-top: 10px; width: 300px; margin-left: auto; margin-right: auto;">
+                    <p style="font-size: 18px; color: #333;">快乐能量：<span id="energyCount">0</span>/100</p>
+                    <div style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+                        <div id="energyProgress" style="width: 0%; height: 100%; background-color: #ff9a3c; border-radius: 10px;"></div>
+                    </div>
+                </div>
+                <p id="nailongStatus">奶龙：快来和我玩吧～</p>
+            </div>
+
+            <!-- 功能区 -->
+            <div class="function-area">
+                <!-- 拆分后的双模块：奶龙日记 + 用户心情日记 -->
+                <div style="display: flex; gap: 20px;">
+                    <!-- 奶龙日记（提示模块） -->
+                    <div class="nailong-diary-module" style="flex: 1;">
+                        <h3>奶龙的日记</h3>
+                        <div id="nailongDiaryContent" style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #f8f8f8; line-height: 1.5;">
+                            龙龙今天遇到一个超棒的人类
+                        </div>
+                    </div>
+
+                    <!-- 用户心情日记模块 -->
+                    <div class="user-diary-module" style="flex: 1;">
+                        <h3>我的心情日记</h3>
+                        <!-- 新增心情选择 -->
+                        <div style="margin: 10px 0;">
+                            <label>选择今日心情：</label>
+                            <select id="moodSelect">
+                                <option value="激动">激动</option>
+                                <option value="开心">开心</option>
+                                <option value="平静" selected>平静</option>
+                                <option value="生气">生气</option>
+                                <option value="难过">难过</option>
+                            </select>
+                        </div>
+                        <textarea id="diaryContent" placeholder="今天心情怎么样？写下你的日记吧～"></textarea>
+                        <button onclick="saveDiary()">保存日记</button>
+                        <div id="diaryList" class="diary-list">
+                            <!-- 日记列表会动态显示 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保留聊天模块 -->
+                <div class="chat-module">
+                    <h3>和奶龙聊天</h3>
+                    <div id="chatBox" class="chat-box">
+                        <!-- 聊天记录会动态显示 -->
+                        <div class="chat-bubble nailong">奶龙：你好呀～😊</div>
+                    </div>
+                    <input type="text" id="chatInput" placeholder="输入想对奶龙说的话...">
+                    <button onclick="sendChat()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入逻辑文件 -->
+    <script src="script.js"></script>
+</body>
+</html>

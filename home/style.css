@@ -1,0 +1,228 @@
+/* 全局样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "微软雅黑", sans-serif;
+}
+
+body {
+    background-color: #f9f5e7;
+    min-height: 100vh;
+}
+
+/* 登录弹窗样式 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: center;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.modal-content button {
+    padding: 10px 20px;
+    background-color: #ff9a3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* 顶部栏样式 */
+.top-bar {
+    background-color: #ffd285;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    gap: 20px; /* 按钮之间的间距 */
+}
+
+.top-bar span { /* 日历文字样式 */
+    font-weight: bold;
+    color: #333;
+    font-size: 20px;
+}
+
+.top-bar button {
+    padding: 10px 20px;
+    background-color: #ff9a3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* 奶龙日记和用户日记模块适配 */
+.nailong-diary-module, .user-diary-module {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.user-diary-module textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 10px 0;
+    resize: none;
+}
+
+.user-diary-module button {
+    padding: 10px 20px;
+    background-color: #ff9a3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* 主容器样式（适配电脑屏幕） */
+.main-container {
+    display: flex;
+    padding: 30px;
+    gap: 50px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 奶龙展示区 */
+.nailong-area {
+    flex: 1;
+    text-align: center;
+}
+
+.nailong-area img {
+    width: 300px;
+    height: auto;
+}
+
+.nailong-area p {
+    margin-top: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+/* 功能区 */
+.function-area {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* 心情日记模块 */
+.diary-module {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.diary-module textarea {
+    width: 100%;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 10px 0;
+    resize: none;
+}
+
+.diary-module button {
+    padding: 10px 20px;
+    background-color: #ff9a3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.diary-list {
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+/* 聊天模块 */
+.chat-module {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.chat-box {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+    overflow-y: auto;
+    background-color: #f8f8f8;
+}
+
+.chat-bubble {
+    margin: 8px 0;
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 70%;
+    clear: both;
+}
+
+.chat-bubble.user {
+    background-color: #ff9a3c;
+    color: white;
+    float: right;
+}
+
+.chat-bubble.nailong {
+    background-color: #e0e0e0;
+    color: #333;
+    float: left;
+}
+
+.chat-module input {
+    width: calc(100% - 80px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.chat-module button {
+    width: 70px;
+    padding: 10px;
+    background-color: #ff9a3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}

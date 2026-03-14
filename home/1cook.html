@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神秘的食谱——初遇</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background-color: #f9f5e7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* 返回主页面按钮 */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            background-color: #ff8811;
+        }
+
+        /* 故事大框框 */
+        .story-container {
+            width: 80%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 故事标题 */
+        .story-title {
+            font-size: 28px;
+            color: #e64a19;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* 故事文本 */
+        .story-content {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: left;
+            white-space: pre-line; /* 保留换行符，让文本排版更自然 */
+        }
+
+        /* 故事配图 */
+        .story-img {
+            width: 60%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        /* 确认帮助按钮 */
+        .confirm-btn {
+            padding: 12px 30px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn:hover {
+            background-color: #ff8811;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页面按钮 -->
+    <button class="back-btn" onclick="goBack()">返回主页面</button>
+
+    <!-- 故事大框框 -->
+    <div class="story-container">
+        <!-- 故事标题 -->
+        <h1 class="story-title">神秘的食谱——初遇</h1>
+        
+        <!-- 故事文本 -->
+        <div class="story-content">
+你第一次带奶龙来到小摊前，想买生鸡腿。
+奶奶正对着一本破旧的笔记本发呆，没注意到你。奶龙轻轻叫了一声，她才回过神。
+"哎呀，来客人了。要买鸡腿吗？可是……今天我做不出来了。这本食谱，我记不清了。"
+她递给你一个泛黄的笔记本。上面画着各种鸡腿的做法，但关键步骤处都是空白和问号。
+"这是我妈妈留给我的食谱，但我小时候没好好学，后来她走了……现在我想做，却想不起关键的步骤了。你能帮我回忆起来吗？如果你可以帮帮我，我就送你一些生鸡腿。"
+”下一次过来，我会给你们一些线索。“
+        </div>
+        
+        <!-- 故事配图 -->
+        <img src="../images/1meet.jpg" alt="初遇奶奶和食谱" class="story-img">
+        
+        <!-- 确认帮助按钮 -->
+        <button class="confirm-btn" onclick="goToCook()">答应帮助，获得5个生鸡腿</button>
+    </div>
+
+    <script>
+        // 全局变量：记录当前登录用户（确保返回主页面无需重新登录）
+        let currentUser = "";
+
+        // 页面加载初始化
+        window.onload = function() {
+            // 1. 获取当前登录用户（和之前页面逻辑一致）
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            for (let username in allUsers) {
+                currentUser = username;
+                break;
+            }
+            // 2. 未登录则返回主页面
+            if (!currentUser) {
+                alert("请先在主页面登录！");
+                window.location.href = "index.html";
+                return;
+            }
+        };
+
+        // 返回主页面
+        function goBack() {
+            window.location.href = "index.html";
+        }
+
+        // 点击“确认帮助”跳转到cook.html
+        function goToCook() {
+            // 记录做鸡腿的次数（首次为1）—— 保留原有逻辑，不新增鸡腿相关代码
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (allUsers[currentUser]) {
+                allUsers[currentUser].makeLegCount = 1;
+                localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            }
+            // 跳转目标改为cook.html（核心修改）
+            window.location.href = "cook.html";
+        }
+    </script>
+</body>
+</html>

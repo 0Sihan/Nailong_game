@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶龙的探险之旅</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background-color: #f9f5e7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px 0;
+        }
+
+        /* 返回主页面按钮 */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 10;
+        }
+
+        /* 地图容器 */
+        .map-container {
+            position: relative;
+            width: 80%;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+
+        /* 地图图片样式 */
+        .adventure-map {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 探险地点按钮样式（绝对定位到地图对应位置） */
+        .place-btn {
+            position: absolute;
+            padding: 13px 18px;
+            background-color: rgba(248, 146, 51, 0.849);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .place-btn:hover {
+            background-color: rgba(251, 131, 12, 0.949);
+        }
+
+        .place-btn.disabled {
+            background-color: rgba(139, 138, 138, 0.752);
+            cursor: not-allowed;
+        }
+
+        /* 地点定位：根据地图调整top/left，你可根据实际图片微调 */
+        #xiaoshulin {
+            left: 12%;
+            bottom: 15%;
+        }
+
+        #shenmishandong {
+            left: 43%;
+            top: 45%;
+        }
+
+        #xuanxiaojishi {
+            right: 9%;
+            top: 29%;
+        }
+
+        /* 事件弹窗样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            width: 500px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 16px;
+            margin-top: 15px;
+        }
+
+        .modal-btn:hover {
+            background-color: #ff8811;
+        }
+
+        /* 密码输入框样式 */
+        #passwordInput {
+            padding: 8px 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 200px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 返回主页面按钮 -->
+    <button class="back-btn" onclick="goBack()">返回主页面</button>
+
+    <!-- 探险地图容器 -->
+    <div class="map-container">
+        <img src="../images/adventure_map.png" alt="探险地图" class="adventure-map">
+        <!-- 探险地点按钮 -->
+        <button class="place-btn" id="xiaoshulin" onclick="clickPlace('小树林')">小树林</button>
+        <button class="place-btn" id="shenmishandong" onclick="clickPlace('神秘山洞')">神秘山洞</button>
+        <button class="place-btn" id="xuanxiaojishi" onclick="clickPlace('喧嚣集市')">喧嚣集市</button>
+    </div>
+
+    <!-- 事件弹窗 -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content" id="eventContent">
+            <!-- 事件内容会动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentUser = "";        // 当前登录用户
+        let adventureCount = 0;     // 探险次数（决定解锁地点）
+        let currentDay = 1;         // 当前天数
+
+        // 页面加载初始化
+        window.onload = function() {
+            // 1. 获取当前登录用户
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            for (let username in allUsers) {
+                currentUser = username;
+                break;
+            }
+            if (!currentUser) {
+                alert("请先在主页面登录！");
+                window.location.href = "index.html";
+                return;
+            }
+
+            // 2. 获取用户探险次数和当前天数
+            const userData = allUsers[currentUser];
+            adventureCount = userData.adventureCount || 0; // 初始为0（第一次探险）
+            currentDay = userData.currentDay || 1;
+
+            // 3. 根据探险次数解锁地点
+            unlockPlaces();
+        };
+
+        // 根据探险次数解锁地点
+        function unlockPlaces() {
+            const shandongBtn = document.getElementById("shenmishandong");
+            const jishiBtn = document.getElementById("xuanxiaojishi");
+
+            // 第一次探险（adventureCount=0）：仅解锁小树林
+            if (adventureCount === 0) {
+                shandongBtn.classList.add("disabled");
+                jishiBtn.classList.add("disabled");
+            }
+            // 第二次探险（adventureCount=1）：解锁小树林+神秘山洞
+            else if (adventureCount === 1) {
+                shandongBtn.classList.remove("disabled");
+                jishiBtn.classList.add("disabled");
+            }
+            // 第三次及以上：全部解锁
+            else {
+                shandongBtn.classList.remove("disabled");
+                jishiBtn.classList.remove("disabled");
+            }
+        }
+
+        // 点击探险地点
+        function clickPlace(place) {
+            // 1. 检查地点是否解锁
+            if (!isPlaceUnlocked(place)) {
+                showEventModal("暂未解锁", "", []);
+                return;
+            }
+
+            // 2. 记录探险次数（每次有效点击+1）
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            allUsers[currentUser].adventureCount = (allUsers[currentUser].adventureCount || 0) + 1;
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+
+            // 3. 触发对应地点的随机事件
+            triggerRandomEvent(place);
+        }
+
+        // 检查地点是否解锁
+        function isPlaceUnlocked(place) {
+            if (place === "小树林") return true; // 始终解锁
+            if (place === "神秘山洞" && adventureCount >= 1) return true;
+            if (place === "喧嚣集市" && adventureCount >= 2) return true;
+            return false;
+        }
+
+        // 触发地点随机事件
+        function triggerRandomEvent(place) {
+            let eventHtml = "";
+            let buttons = [];
+
+            // 小树林事件
+            if (place === "小树林") {
+                const randomEvent = Math.random() > 0.5 ? 1 : 2; // 随机选事件1/2
+                if (randomEvent === 1) {
+                    // 事件1：奇怪的树
+                    eventHtml = "发生事件：发现一棵奇怪的树，树上挂着几个鸡腿";
+                    buttons = [
+                        { text: "让奶龙爬树", callback: "treeClimbEvent()" },
+                        { text: "用石头砸", callback: "stoneHitEvent()" }
+                    ];
+                } else {
+                    // 事件2：野餐篮
+                    eventHtml = "发生事件：奶龙闻到香味，发现一个野餐篮";
+                    buttons = [
+                        { text: "打开看看", callback: "openBasketEvent()" },
+                        { text: "等主人来", callback: "waitMasterEvent()" }
+                    ];
+                }
+            }
+
+            // 神秘山洞事件
+            else if (place === "神秘山洞") {
+                const randomEvent = Math.random() > 0.5 ? 1 : 2; // 随机选事件1/2
+                if (randomEvent === 1) {
+                    // 事件1：回声游戏
+                    eventHtml = "发生事件：山洞深处有回声，奶龙玩起了回声游戏";
+                    buttons = [
+                        { text: "确定", callback: "echoGameEvent()" }
+                    ];
+                } else {
+                    // 事件2：宝箱密码
+                    eventHtml = `
+                        发生事件：奶龙发现这里有宝箱，输入密码打开\n密码提示:奶龙生日<br>
+                        <input type="text" id="passwordInput" placeholder="输入4位密码">
+                    `;
+                    buttons = [
+                        { text: "确认密码", callback: "checkPasswordEvent()" }
+                    ];
+                }
+            }
+
+            // 喧嚣集市事件
+            else if (place === "喧嚣集市") {
+                // 事件：卖气球的
+                eventHtml = "发生事件：遇到一个卖气球的，奶龙想要，但你没钱";
+                buttons = [
+                    { text: "用2个鸡腿换", callback: "exchangeLegEvent()" },
+                    { text: "不换", callback: "noExchangeEvent()" }
+                ];
+            }
+
+            // 显示事件弹窗
+            showEventModal(eventHtml, "", buttons);
+        }
+
+        // 显示事件弹窗
+        function showEventModal(content, subContent, buttons) {
+            let btnHtml = "";
+            buttons.forEach(btn => {
+                btnHtml += `<button class="modal-btn" onclick="${btn.callback}">${btn.text}</button>`;
+            });
+            document.getElementById("eventContent").innerHTML = `
+                <h3>${content}</h3>
+                ${subContent}
+                ${btnHtml}
+            `;
+            document.getElementById("eventModal").style.display = "flex";
+        }
+
+        // ---------------------- 小树林事件回调 ----------------------
+        // 让奶龙爬树
+        function treeClimbEvent() {
+            const success = Math.random() < 0.7; // 70%成功
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (success) {
+                allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) + 5;
+                alert("奶龙成功爬上树！获得5个鸡腿～");
+            } else {
+                allUsers[currentUser].energyCount = Math.max((allUsers[currentUser].energyCount || 0) - 5, 0);
+                alert("奶龙摔下来了😭！快乐能量减少5～");
+            }
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            finishEvent();
+        }
+
+        // 用石头砸
+        function stoneHitEvent() {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) + 2;
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            alert("用石头砸下了2个鸡腿～");
+            finishEvent();
+        }
+
+        // 打开野餐篮
+        function openBasketEvent() {
+            const success = Math.random() < 0.5; // 50%成功
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (success) {
+                allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) + 5;
+                alert("打开野餐篮！获得5个鸡腿～");
+            } else {
+                allUsers[currentUser].energyCount = Math.max((allUsers[currentUser].energyCount || 0) - 5, 0);
+                alert("被主人发现了😟！快乐能量减少5～");
+            }
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            finishEvent();
+        }
+
+        // 等主人来
+        function waitMasterEvent() {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) + 2;
+            allUsers[currentUser].energyCount = (allUsers[currentUser].energyCount || 0) + 3;
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            alert("主人回来啦！分了你2个鸡腿，还感谢了你～快乐能量+3～");
+            finishEvent();
+        }
+
+        // ---------------------- 神秘山洞事件回调 ----------------------
+        // 回声游戏
+        function echoGameEvent() {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            allUsers[currentUser].energyCount = (allUsers[currentUser].energyCount || 0) + 8;
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            alert("奶龙玩得超开心！快乐能量+8～");
+            finishEvent();
+        }
+
+        // 检查宝箱密码
+        function checkPasswordEvent() {
+            const password = document.getElementById("passwordInput").value.trim();
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (password === "0122") {
+                allUsers[currentUser].energyCount = (allUsers[currentUser].energyCount || 0) + 18;
+                alert("密码正确！打开宝箱～快乐能量+18～");
+            } else {
+                alert("密码错误😭！什么都没得到～");
+            }
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            finishEvent();
+        }
+
+        // ---------------------- 喧嚣集市事件回调 ----------------------
+        // 用鸡腿换气球
+        function exchangeLegEvent() {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if ((allUsers[currentUser].legCount || 0) < 2) {
+                alert("鸡腿数量不够2个～无法兑换！");
+                return;
+            }
+            allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) - 2;
+            allUsers[currentUser].energyCount = Math.min((allUsers[currentUser].energyCount || 0) + 20, 100);
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            alert("用2个鸡腿换到了气球！奶龙超开心～快乐能量+20～");
+            finishEvent();
+        }
+
+        // 不换气球
+        function noExchangeEvent() {
+            alert("奶龙有点小失落，但还是乖乖跟你走啦～");
+            finishEvent();
+        }
+
+        // 完成事件：关闭弹窗，更新天数和奶龙日记，返回主页面
+        function finishEvent() {
+            // 1. 关闭事件弹窗
+            document.getElementById("eventModal").style.display = "none";
+
+            // 2. 更新用户数据：天数+1，奶龙日记
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            allUsers[currentUser].currentDay = (allUsers[currentUser].currentDay || 1) + 1;
+            allUsers[currentUser].nailongDiary = "人家饿饿，想吃饭饭v_v";
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+
+            // 3. 跳回主页面
+            window.location.href = "index.html";
+        }
+
+        // 返回主页面
+        function goBack() {
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
