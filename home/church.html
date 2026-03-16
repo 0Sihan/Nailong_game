@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教堂</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background: url("../images/Church.jpg") no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 半透明弹窗 */
+        .modal {
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 20px;
+            padding: 35px 40px;
+            max-width: 650px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            font-size: 28px;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .content {
+            font-size: 18px;
+            line-height: 1.9;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            padding: 16px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #ff8008;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="modal">
+        <div class="title">教堂</div>
+        <div class="content">
+            你来到安静的教堂，阳光透过彩绘玻璃洒下来。<br>
+            神父告诉你：奶奶小时候经常来这里听唱诗班，她最喜欢的旋律，和“妈妈的歌谣”很像。<br>
+            你在这里获得了一段关于曲调的线索，但完整的歌词，还需要去别的地方继续寻找。
+        </div>
+        <button class="back-btn" onclick="goBack()">获得曲谱线索，回到小镇</button>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = "cook3.html";
+        }
+    </script>
+</body>
+</html>

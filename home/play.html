@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和奶龙捉迷藏</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background-color: #f9f5e7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+            /* 允许点击整个页面触发事件 */
+            cursor: pointer;
+        }
+
+        /* 气泡样式（奶龙的话） */
+        .speech-bubble {
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 22px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        /* 气泡小尾巴 */
+        .speech-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 15px 15px 0;
+            border-style: solid;
+            border-color: rgb(244, 236, 188) transparent transparent;
+        }
+
+        /* 奶龙图片样式 */
+        .nailong-img {
+            width: 460px;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: 80px
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none; /* 默认隐藏 */
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            width: 400px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 28px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 18px;
+        }
+
+        .modal-btn:hover {
+            background-color: #ff8811;
+        }
+
+        /* 返回主页面按钮 */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body onclick="showHideModal()">
+    <!-- 返回主页面按钮 -->
+    <button class="back-btn" onclick="goBack(event)">返回主页面</button>
+
+    <!-- 奶龙的气泡 -->
+    <div class="speech-bubble" id="nailongSpeech">我们来玩捉迷藏吧！</div>
+
+    <!-- 奶龙捉迷藏图片 -->
+    <img src="../images/hideplay.jpg" alt="奶龙捉迷藏" class="nailong-img">
+
+    <!-- 藏身处选择弹窗 -->
+    <div class="modal" id="hideModal">
+        <div class="modal-content">
+            <h3>选一个地方藏好</h3>
+            <button class="modal-btn" onclick="chooseHidePlace('垃圾桶里')">垃圾桶里</button>
+            <button class="modal-btn" onclick="chooseHidePlace('树枝上')">树枝上</button>
+            <button class="modal-btn" onclick="chooseHidePlace('草丛里')">草丛里</button>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <h3 id="resultText"></h3>
+            <button class="modal-btn" onclick="closeResultModal()">确定</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量：记录当前登录用户（从本地存储获取）
+        let currentUser = "";
+        // 新增：控制是否可交互（防止重复点击）
+        let isInteractable = true; // 默认可交互
+        // 藏身处列表（和按钮对应）
+        const hidePlaces = ["垃圾桶里", "树枝上", "草丛里"];
+
+        // 页面加载时获取当前登录用户
+        window.onload = function() {
+            // 读取所有用户数据，找到最后登录的用户（或当前有数据的用户）
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            // 简单处理：取第一个有数据的用户（后续可优化为记录最后登录用户）
+            for (let username in allUsers) {
+                currentUser = username;
+                break;
+            }
+            // 如果没有登录用户，返回主页面
+            if (!currentUser) {
+                alert("请先在主页面登录！");
+                window.location.href = "index.html";
+            }
+        };
+
+        // 点击页面显示藏身处选择弹窗
+        function showHideModal() {
+            // 只有可交互时才显示弹窗
+            if (isInteractable) {
+                document.getElementById("hideModal").style.display = "flex";
+            }
+        }
+
+        // 选择藏身处后的逻辑
+        function chooseHidePlace(place) {
+            // 1. 先判断是否可交互，不可交互则直接返回
+            if (!isInteractable) return;
+
+            // 2. 禁用交互（关键：防止1秒内重复点击）
+            isInteractable = false;
+
+            // 3. 隐藏藏身处弹窗
+            document.getElementById("hideModal").style.display = "none";
+            // 4. 修改奶龙的气泡文字
+            document.getElementById("nailongSpeech").textContent = "略略略数好了！";
+            // 5. 随机生成结果
+            setTimeout(() => {
+                // 随机是否找到（true=找到，false=没找到）
+                const isFound = Math.random() > 0.5;
+                // 修复：抓到+10，没抓到+5
+                let energyAdd = 0;
+                let resultDesc = "";
+                if (isFound) {
+                    energyAdd = 10; // 抓到→+10
+                    resultDesc = "并抓住了你";
+                } else {
+                    energyAdd = 5;  // 没抓到→+5
+                    resultDesc = "没有找到你";
+                }
+                // 结果文案
+                const resultText = `奶龙跑向${place}，${resultDesc}，快乐能量+${energyAdd}`;
+                // 显示结果弹窗
+                document.getElementById("resultText").textContent = resultText;
+                document.getElementById("resultModal").style.display = "flex";
+                // 6. 更新用户的快乐能量
+                updateEnergy(energyAdd);
+
+                // 7. 恢复可交互（数数结束后才能再次操作）
+                isInteractable = true;
+            }, 1000); // 延迟1秒显示结果，模拟奶龙找的过程
+        }
+
+        // 更新快乐能量并保存到本地存储
+        function updateEnergy(addNum) {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (allUsers[currentUser]) {
+                // 快乐能量最多100
+                allUsers[currentUser].energyCount = Math.min(allUsers[currentUser].energyCount + addNum, 100);
+                localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            }
+        }
+
+        // 关闭结果弹窗（并返回主页面，更新天数和奶龙日记）
+        function closeResultModal() {
+            document.getElementById("resultModal").style.display = "none";
+            // 重置奶龙气泡文字
+            document.getElementById("nailongSpeech").textContent = "我们来玩捉迷藏吧！";
+
+            // 1. 读取所有用户数据，更新当前用户的天数（+1）
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (allUsers[currentUser]) {
+                // 天数+1
+                allUsers[currentUser].currentDay = (allUsers[currentUser].currentDay || 1) + 1;
+                // 记录奶龙日记内容（后续主页面会读取）
+                allUsers[currentUser].nailongDiary = "昨天的捉迷藏真好玩~";
+                // 保存修改后的数据
+                localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            }
+
+            // 2. 自动跳回主页面
+            window.location.href = "index.html";
+        }
+
+        // 返回主页面（阻止冒泡，避免触发点击页面的事件）
+        function goBack(event) {
+            event.stopPropagation(); // 阻止事件冒泡到body
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

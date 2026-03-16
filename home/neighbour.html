@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老邻居家</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background: url("../images/neighbour.jpg") no-repeat center center;
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 半透明弹窗 */
+        .modal {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 40px 45px;
+            max-width: 720px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .title {
+            font-size: 28px;
+            color: #ff6b35;
+            margin-bottom: 22px;
+            font-weight: bold;
+        }
+
+        .content {
+            font-size: 18px;
+            line-height: 2;
+            color: #333;
+            white-space: pre-line;
+            margin-bottom: 32px;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #ff8008;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="modal">
+        <div class="title">老邻居家</div>
+        <div class="content">
+慈祥的老奶奶打开门，听完你的来意，慢慢回忆：
+“我记得啊！奶奶的妈妈做鸡腿时，总会一边搅拌一边哼歌……
+但歌词我记不清了，只记得和‘小鸡腿’‘油花’有关。
+而且每次做鸡腿时，就对着厨房窗外唱，窗外是她女儿玩耍的地方。”
+        </div>
+        <button class="back-btn" onclick="goBack()">获得线索，回到小镇</button>
+    </div>
+
+    <script>
+        function goBack() {
+            window.location.href = "cook3.html";
+        }
+    </script>
+</body>
+</html>

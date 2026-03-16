@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>找回食谱线索</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        /* 页面背景：铺满全屏 */
+        body {
+            background: url("../images/memory_map.jpg") no-repeat center center fixed;
+            background-size: 1280px 790px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 圆圈按钮容器：水平排列 */
+        .btn-circle-container {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            max-width: 800px;
+            margin-top: 6px;
+            margin-left: 40px;
+        }
+
+        /* 圆圈按钮样式 */
+        .circle-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%; /* 圆形 */
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        /* 可点击状态（橙色） */
+        .circle-btn.active {
+            background-color: #fa861bca;
+            box-shadow: 0 0 20px rgba(255, 154, 60, 0.8);
+        }
+
+        /* 不可点击状态（灰色） */
+        .circle-btn.disabled {
+            background-color: #999;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        /* 弹窗样式：居中显示 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        /* 弹窗内容 */
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.842);
+            border-radius: 15px;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            height:300px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        /* 弹窗左侧图片 */
+        .modal-img {
+            width: 180px;
+            height: 180px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        /* 弹窗右侧内容容器 */
+        .modal-right-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 弹窗文字 */
+        .modal-text {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        /* 输入框 */
+        .answer-input {
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 2px solid #d3d2d2f9;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .answer-input:focus {
+            border-color: #ff9a3c;
+        }
+
+        /* 结果按钮 */
+        .result-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* 正确按钮（绿色） */
+        .correct-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .correct-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* 错误按钮（橙色） */
+        .error-btn {
+            background-color: #ff9a3c;
+            color: white;
+        }
+
+        .error-btn:hover {
+            background-color: #ff8811;
+        }
+
+        /* 隐藏元素 */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- 圆圈按钮容器 -->
+    <div class="btn-circle-container">
+        <button class="circle-btn active" id="leftBtn" onclick="openLeftModal()">线索1</button>
+        <button class="circle-btn disabled" id="middleBtn" onclick="openMiddleModal()">线索2</button>
+        <button class="circle-btn disabled" id="rightBtn" onclick="openRightModal()">线索3</button>
+    </div>
+
+    <!-- 左侧按钮弹窗 -->
+    <div class="modal hidden" id="leftModal">
+        <div class="modal-content">
+            <img src="../images/think.jpg" class="modal-img">
+            <div class="modal-right-content">
+                <div class="modal-text">
+                    奶龙翻开泛黄的食谱，指着“香料”一栏，耳边响起老奶奶的声音：“妈妈总说，香料要去集市最东边的老店买。那家店门口挂着一块木牌，上面刻着四个大字，那好像是开店的日子，‘吾店开张，吉日三六’……是多少来着？”
+                </div>
+                <input type="text" class="answer-input" id="leftAnswer" placeholder="请输入四字农历日期">
+                <button class="result-btn hidden correct-btn" id="leftCorrectBtn" onclick="leftCorrect()">日期正确，获得1个生鸡腿</button>
+                <button class="result-btn hidden error-btn" id="leftErrorBtn" onclick="leftError()">再想想</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 中间按钮弹窗 -->
+    <div class="modal hidden" id="middleModal">
+        <div class="modal-content">
+            <img src="../images/think.jpg" class="modal-img">
+            <div class="modal-right-content">
+                <div class="modal-text">
+                    奶奶闭上眼睛回忆：“妈妈说，火候要看锅里的油花，像星星一样跳舞时就对了。可什么叫‘星星跳舞’？她好像还说过一个词，叫“油温___成，油花如星”......
+                </div>
+                <input type="text" class="answer-input" id="middleAnswer" placeholder="请输入一个大写数字使口诀完整">
+                <button class="result-btn hidden correct-btn" id="middleCorrectBtn" onclick="middleCorrect()">油温正确，获得2个生鸡腿</button>
+                <button class="result-btn hidden error-btn" id="middleErrorBtn" onclick="middleError()">再想想</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧按钮弹窗 -->
+    <div class="modal hidden" id="rightModal">
+        <div class="modal-content">
+            <img src="../images/think.jpg" class="modal-img">
+            <div class="modal-right-content">
+                <div class="modal-text">
+                    奶奶叹气道：“家里有个传承已久的铁锅，可是前几天收破烂的来，我糊里糊涂把它卖了。他说如果我要赎回来，就得说出这个锅的使用年载——吾家小锅，名曰‘卅’，底有星痕，伴我______载。”
+                </div>
+                <input type="text" class="answer-input" id="rightAnswer" placeholder="请输入二字大写数字帮奶奶补充年载">
+                <button class="result-btn hidden correct-btn" id="rightCorrectBtn" onclick="rightCorrect()">回答正确，获得2个生鸡腿</button>
+                <button class="result-btn hidden error-btn" id="rightErrorBtn" onclick="rightError()">再想想</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentUser = "";
+        let step = 1;
+        let rawLegCount = 0;
+
+        window.onload = function() {
+            const isLoggedIn = sessionStorage.getItem("nailong_is_logged_in");
+            const loggedUsername = sessionStorage.getItem("nailong_current_user");
+            
+            if (isLoggedIn === "true" && loggedUsername) {
+                currentUser = loggedUsername;
+            } else {
+                alert("请先在主页面登录！");
+                window.location.href = "index.html";
+                return;
+            }
+
+            document.getElementById("leftAnswer").addEventListener("keyup", function(e) {
+                if (e.key === "Enter") checkLeftAnswer();
+            });
+            document.getElementById("middleAnswer").addEventListener("keyup", function(e) {
+                if (e.key === "Enter") checkMiddleAnswer();
+            });
+            document.getElementById("rightAnswer").addEventListener("keyup", function(e) {
+                if (e.key === "Enter") checkRightAnswer();
+            });
+        };
+
+        // 左侧
+        function openLeftModal() {
+            if (step !== 1) return;
+            document.getElementById("leftModal").classList.remove("hidden");
+            document.getElementById("leftAnswer").value = "";
+            document.getElementById("leftCorrectBtn").classList.add("hidden");
+            document.getElementById("leftErrorBtn").classList.add("hidden");
+        }
+        function checkLeftAnswer() {
+            const answer = document.getElementById("leftAnswer").value.trim();
+            if (answer === "三月初六") {
+                document.getElementById("leftCorrectBtn").classList.remove("hidden");
+                document.getElementById("leftErrorBtn").classList.add("hidden");
+                rawLegCount += 1;
+            } else {
+                document.getElementById("leftCorrectBtn").classList.add("hidden");
+                document.getElementById("leftErrorBtn").classList.remove("hidden");
+            }
+        }
+        function leftCorrect() {
+            document.getElementById("leftModal").classList.add("hidden");
+            step = 2;
+            document.getElementById("leftBtn").classList.remove("active");
+            document.getElementById("leftBtn").classList.add("disabled");
+            document.getElementById("middleBtn").classList.remove("disabled");
+            document.getElementById("middleBtn").classList.add("active");
+        }
+        function leftError() {
+            document.getElementById("leftAnswer").value = "";
+            document.getElementById("leftErrorBtn").classList.add("hidden");
+        }
+
+        // 中间
+        function openMiddleModal() {
+            if (step !== 2) return;
+            document.getElementById("middleModal").classList.remove("hidden");
+            document.getElementById("middleAnswer").value = "";
+            document.getElementById("middleCorrectBtn").classList.add("hidden");
+            document.getElementById("middleErrorBtn").classList.add("hidden");
+        }
+        function checkMiddleAnswer() {
+            const answer = document.getElementById("middleAnswer").value.trim();
+            if (answer === "六") {
+                document.getElementById("middleCorrectBtn").classList.remove("hidden");
+                document.getElementById("middleErrorBtn").classList.add("hidden");
+                rawLegCount += 2;
+            } else {
+                document.getElementById("middleCorrectBtn").classList.add("hidden");
+                document.getElementById("middleErrorBtn").classList.remove("hidden");
+            }
+        }
+        function middleCorrect() {
+            document.getElementById("middleModal").classList.add("hidden");
+            step = 3;
+            document.getElementById("middleBtn").classList.remove("active");
+            document.getElementById("middleBtn").classList.add("disabled");
+            document.getElementById("rightBtn").classList.remove("disabled");
+            document.getElementById("rightBtn").classList.add("active");
+        }
+        function middleError() {
+            document.getElementById("middleAnswer").value = "";
+            document.getElementById("middleErrorBtn").classList.add("hidden");
+        }
+
+        // 右侧
+        function openRightModal() {
+            if (step !== 3) return;
+            document.getElementById("rightModal").classList.remove("hidden");
+            document.getElementById("rightAnswer").value = "";
+            document.getElementById("rightCorrectBtn").classList.add("hidden");
+            document.getElementById("rightErrorBtn").classList.add("hidden");
+        }
+        function checkRightAnswer() {
+            const answer = document.getElementById("rightAnswer").value.trim();
+            if (answer === "三十") {
+                document.getElementById("rightCorrectBtn").classList.remove("hidden");
+                document.getElementById("rightErrorBtn").classList.add("hidden");
+                rawLegCount += 2;
+            } else {
+                document.getElementById("rightCorrectBtn").classList.add("hidden");
+                document.getElementById("rightErrorBtn").classList.remove("hidden");
+            }
+        }
+        function rightCorrect() {
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+            if (allUsers[currentUser]) {
+                allUsers[currentUser].rawLegCount = rawLegCount;
+                localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+            }
+            sessionStorage.setItem("nailong_is_logged_in", "true");
+            sessionStorage.setItem("nailong_current_user", currentUser);
+            window.location.href = "cook.html";
+        }
+        function rightError() {
+            document.getElementById("rightAnswer").value = "";
+            document.getElementById("rightErrorBtn").classList.add("hidden");
+        }
+    </script>
+</body>
+</html>
