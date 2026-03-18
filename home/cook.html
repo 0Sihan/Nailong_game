@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烹饪鸡腿</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", sans-serif;
+        }
+
+        body {
+            background-color: #de961099;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部内容区：弹窗+图片 */
+        .top-section {
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 100px;
+            margin-top: 100px;
+        }
+
+        /* 文字弹窗 */
+        .text-modal {
+            flex: 2;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            font-size: 20px;
+            line-height: 1.8;
+            color: #333;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 30px;
+        }
+
+        /* 正方形图片 */
+        .cook-img {
+            flex: 1;
+            width: 300px;
+            height: 300px; /* 正方形 */
+            object-fit: cover; 
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 按钮容器 */
+        .btn-container {
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* 按钮间距 */
+        }
+
+        /* 通用按钮样式 */
+        .cook-btn {
+            padding: 15px 30px;
+            background-color: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .cook-btn:hover {
+            background-color: #ff8811;
+            transform: scale(1.05);
+        }
+
+        /* 隐藏元素的样式 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 空占位 */
+        .empty {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部内容：弹窗+图片 -->
+    <div class="top-section">
+        <!-- 文字弹窗 -->
+        <div class="text-modal" id="textModal">
+            现在有5个生鸡腿，今天想做什么样的鸡腿呢？快来烹饪他们吧！
+        </div>
+        <!-- 正方形图片 -->
+        <img src="../images/cook.jpg" alt="烹饪鸡腿" class="cook-img">
+    </div>
+
+    <!-- 按钮容器 -->
+    <div class="btn-container" id="btnContainer">
+        <!-- 第一步：火候按钮 -->
+        <button class="cook-btn" id="btnFire1" onclick="chooseFire('大火爆香')">大火爆香</button>
+        <button class="cook-btn" id="btnFire2" onclick="chooseFire('小火浸炸')">小火浸炸</button>
+        <button class="cook-btn" id="btnFire3" onclick="chooseFire('中火焖煮')">中火焖煮</button>
+        
+        <!-- 第二步：配料按钮 -->
+        <button class="cook-btn hidden" id="btnSeason1" onclick="chooseSeason('撒把辣椒面')">撒把辣椒面</button>
+        <button class="cook-btn hidden" id="btnSeason2" onclick="chooseSeason('淋上蜂蜜')">淋上蜂蜜</button>
+        <button class="cook-btn hidden" id="btnSeason3" onclick="chooseSeason('加点酱油')">加点酱油</button>
+        
+        <!-- 第三步：确认按钮-->
+        <button class="cook-btn hidden" id="btnConfirm" onclick="finishCook()">好嘟</button>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentUser = "";       // 当前登录用户
+        let selectedFire = "";      // 选中的火候
+        let selectedSeason = "";    // 选中的配料
+        const correctFire = "小火浸炸";    // 正确火候
+        const correctSeason = "淋上蜂蜜";  // 正确配料
+
+        // 页面加载初始化
+        window.onload = function() {
+            // 1. 先检查sessionStorage的登录状态
+            const isLoggedIn = sessionStorage.getItem("nailong_is_logged_in");
+            const loggedUsername = sessionStorage.getItem("nailong_current_user");
+    
+            // 2. 优先用会话状态的用户
+            if (isLoggedIn === "true" && loggedUsername) {
+                currentUser = loggedUsername;
+            } else {
+                // 备用：从localStorage获取用户
+                const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+                for (let username in allUsers) {
+                    currentUser = username;
+                    break;
+                }
+                // 若仍无用户，返回主页面
+                if (!currentUser) {
+                    alert("请先在主页面登录！");
+                    window.location.href = "index.html";
+                    return;
+                }
+                // 同步会话状态
+                sessionStorage.setItem("nailong_is_logged_in", "true");
+                sessionStorage.setItem("nailong_current_user", currentUser);
+            }
+        };
+
+        // 第一步：选择火候
+        function chooseFire(fire) {
+            selectedFire = fire;
+            // 1. 隐藏所有火候按钮
+            document.getElementById("btnFire1").classList.add("hidden");
+            document.getElementById("btnFire2").classList.add("hidden");
+            document.getElementById("btnFire3").classList.add("hidden");
+            // 2. 文字弹窗和按钮区消失1秒
+            document.getElementById("textModal").classList.add("empty");
+            document.getElementById("btnContainer").classList.add("empty");
+            
+            setTimeout(() => {
+                // 3. 恢复显示，更新弹窗文字
+                document.getElementById("textModal").classList.remove("empty");
+                document.getElementById("textModal").textContent = "什么样的味道能拥有爱的记忆呢？选择调味配料吧！";
+                // 4. 显示配料按钮
+                document.getElementById("btnSeason1").classList.remove("hidden");
+                document.getElementById("btnSeason2").classList.remove("hidden");
+                document.getElementById("btnSeason3").classList.remove("hidden");
+                document.getElementById("btnContainer").classList.remove("empty");
+            }, 800); 
+        }
+
+        // 第二步：选择配料
+        function chooseSeason(season) {
+            selectedSeason = season;
+            // 1. 隐藏所有配料按钮
+            document.getElementById("btnSeason1").classList.add("hidden");
+            document.getElementById("btnSeason2").classList.add("hidden");
+            document.getElementById("btnSeason3").classList.add("hidden");
+            // 2. 文字弹窗和按钮区消失1秒
+            document.getElementById("textModal").classList.add("empty");
+            document.getElementById("btnContainer").classList.add("empty");
+            
+            setTimeout(() => {
+                // 3. 恢复显示，计算结果并更新弹窗文字
+                document.getElementById("textModal").classList.remove("empty");
+                const resultText = getResultText();
+                document.getElementById("textModal").textContent = resultText;
+                // 4. 显示确认按钮
+                document.getElementById("btnConfirm").classList.remove("hidden");
+                document.getElementById("btnContainer").classList.remove("empty");
+            }, 700); 
+        }
+
+        // 计算烹饪结果文字
+        function getResultText() {
+            const fireCorrect = selectedFire === correctFire;
+            const seasonCorrect = selectedSeason === correctSeason;
+            
+            if (fireCorrect && seasonCorrect) {
+                return "哇！你做出了记忆中的味道！完美！";
+            } else if (fireCorrect || seasonCorrect) {
+                return "嗯…好像还不够完美，可享用鸡腿为4个。";
+            } else {
+                return "哎呀，鸡腿看起来怪怪的…可享用鸡腿为3个。";
+            }
+        }
+
+        // 计算应增加的鸡腿数
+        function getLegAddCount() {
+            const fireCorrect = selectedFire === correctFire;
+            const seasonCorrect = selectedSeason === correctSeason;
+            
+            if (fireCorrect && seasonCorrect) {
+                return 5;
+            } else if (fireCorrect || seasonCorrect) {
+                return 4;
+            } else {
+                return 3;
+            }
+        }
+
+        // 第三步：点击“好嘟”完成烹饪并返回主页面
+        function finishCook() {
+            // 1. 先获取用户数据
+            const allUsers = JSON.parse(localStorage.getItem("nailong_all_users")) || {};
+    
+            // 2. 初始化用户对象
+            if (!allUsers[currentUser]) allUsers[currentUser] = {};
+
+            // 3. 做鸡腿次数 +1
+            allUsers[currentUser].makeLegCount = (allUsers[currentUser].makeLegCount || 0) + 1;
+
+            // 4. 更新鸡腿、日历、日记
+            const legAdd = getLegAddCount();
+            allUsers[currentUser].legCount = (allUsers[currentUser].legCount || 0) + legAdd;
+            allUsers[currentUser].currentDay = (allUsers[currentUser].currentDay || 1) + 1;
+            // 从cook3回来新日记；其他情况原来的日记
+            if (sessionStorage.getItem("cook3_finished")) {
+                allUsers[currentUser].nailongDiary = "奶奶把回忆带回了家，你的味道，龙龙也藏在心里了。";
+                sessionStorage.removeItem("cook3_finished");
+            } else {
+                allUsers[currentUser].nailongDiary = "鸡腿真好吃，下次我还要再去~";
+            }
+    
+            // 5. 保存
+            localStorage.setItem("nailong_all_users", JSON.stringify(allUsers));
+
+            // 6. 保持登录状态
+            sessionStorage.setItem("nailong_is_logged_in", "true");
+            sessionStorage.setItem("nailong_current_user", currentUser);
+
+            // 7. 跳回主页
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
