@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奶龙小屋</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 喂食弹窗样式 */
+        .feed-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .feed-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .feed-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #ff6b35;
+        }
+        #feedSlider {
+            width: 100%;
+            margin: 15px 0;
+        }
+        .feed-num {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .feed-btn {
+            padding: 10px 25px;
+            background: #ff9a3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .close-feed {
+            margin-top: 10px;
+            padding: 6px 15px;
+            background: #ddd;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2>登录奶龙小屋</h2>
+            <p style="margin: 15px 0; line-height: 1.5; color: #559;">
+                你捡到了一只来自异次元的奶龙，它必须在7天内收集足够的“快乐能量”，才能打开异世界大门回家，如果失败，它将永远留在这里陷入沉睡。
+            </p>
+            <input type="text" id="username" placeholder="请输入你的昵称" required>
+            <input type="password" id="password" placeholder="请输入密码" required>
+            <button onclick="login()">登录/注册</button>
+            <p>首次输入昵称和密码即为创建账户，后续用相同信息可登录</p>
+        </div>
+    </div>
+
+    <div id="mainPage" style="display: none;">
+        <div class="top-bar">
+            <span id="calendarDisplay">第1天</span>
+            <button onclick="jumpToPlay()">玩耍</button>
+            <button onclick="jumpToMakeLeg()">做鸡腿</button>
+            <button onclick="jumpToAdventure()">探险</button>
+        </div>
+
+        <div class="main-container">
+            <div class="nailong-area">
+                <img id="nailongImg" src="../images/Nailongsit.png" alt="奶龙">
+                
+                <!-- 鸡腿数量 + 喂食按钮 -->
+                <p id="legCountDisplay" style="margin-top: 10px; font-size: 18px; color: #e64a19;">
+                    鸡腿：<span id="legCount">0</span>个
+                    <button onclick="openFeed()" style="margin-left:8px; padding:4px 10px; background:#ff9a3c; color:white; border:none; border-radius:6px; cursor:pointer;">喂食</button>
+                </p>
+
+                <div style="margin-top: 10px; width: 300px; margin-left: auto; margin-right: auto;">
+                    <p style="font-size: 18px; color: #333;">快乐能量：<span id="energyCount">0</span>/100</p>
+                    <div style="width: 100%; height: 20px; background-color: #eee; border-radius: 10px; overflow: hidden;">
+                        <div id="energyProgress" style="width: 0%; height: 100%; background-color: #ff9a3c; border-radius: 10px;"></div>
+                    </div>
+                </div>
+                <p id="nailongStatus">奶龙：快来和我玩吧～</p>
+            </div>
+
+            <div class="function-area">
+                <div style="display: flex; gap: 20px;">
+                    <div class="nailong-diary-module" style="flex: 1;">
+                        <h3>奶龙的日记</h3>
+                        <div id="nailongDiaryContent" style="width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; background-color: #f8f8f8; line-height: 1.5;">
+                            龙龙今天遇到一个超棒的人类
+                        </div>
+                    </div>
+
+                    <div class="user-diary-module" style="flex: 1;">
+                        <h3>我的心情日记</h3>
+                        <div style="margin: 10px 0;">
+                            <label>选择今日心情：</label>
+                            <select id="moodSelect">
+                                <option value="激动">激动</option>
+                                <option value="开心">开心</option>
+                                <option value="平静" selected>平静</option>
+                                <option value="生气">生气</option>
+                                <option value="难过">难过</option>
+                            </select>
+                        </div>
+                        <textarea id="diaryContent" placeholder="今天心情怎么样？写下你的日记吧～"></textarea>
+                        <button onclick="saveDiary()">保存日记</button>
+                        <div id="diaryList" class="diary-list"></div>
+                    </div>
+                </div>
+
+                <div class="chat-module">
+                    <h3>和奶龙聊天</h3>
+                    <div id="chatBox" class="chat-box">
+                        <div class="chat-bubble nailong">你好呀，我是奶龙～</div>
+                    </div>
+                    <input type="text" id="chatInput" placeholder="输入想对奶龙说的话...">
+                    <button onclick="sendChat()">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 喂食弹窗 -->
+    <div class="feed-modal" id="feedModal">
+        <div class="feed-box">
+            <div class="feed-title">今天喂几个鸡腿呢？</div>
+            <input type="range" id="feedSlider" min="0" max="0" value="0">
+            <div class="feed-num">数量：<span id="feedNum">0</span> 个</div>
+            <button class="feed-btn" onclick="doFeed()">喂食</button>
+            <br>
+            <button class="close-feed" onclick="closeFeed()">取消</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- 底部作者联系方式 -->
+        <div style="
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff5e6;
+            text-align: center;
+            padding: 5px 0;
+            font-size: 10px;
+            color: #777;
+            border-top: 1px solid #ffd9b3;
+        ">
+    Contact author: 2220962474@qq.com | Please indicate your purpose.
+</div>
+</body>
+</html>
