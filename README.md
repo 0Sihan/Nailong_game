@@ -3,7 +3,7 @@
 一款基于原生 HTML + CSS + JavaScript 独立制作的短篇文字互动网页游戏，共11个独立游戏页面，设计4种差异化结局。玩家将陪伴可爱的异次元奶龙度过七天时光，通过探险、烹饪美食、投喂互动、日常对话积攒快乐能量，第七日结束后根据能量数值触发不同分离结局。
 游戏内置智能对话系统，接入通义千问大模型还原动画原版奶龙软萌人设，支持实时短句互动；本地存储完整存档系统，昵称、鸡腿数量、快乐能量、日记、探险进度、游戏天数全部永久保存，关闭页面后再次打开无需重复登录。
 
-![BQACAgUAAyEGAASHRsPbAAEWFlFqPUql](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEWFlFqPUql_joCoHcsPrdhCjtPlPRapgAC-TIAAoQQ6VW_Zh4pTe4n1zwE.jpg)
+![奶龙配图](./images/cook.jpg)
 
 在线试玩地址：https://0sihan.github.io/Nailong_game/home/ （电脑端打开）
 
